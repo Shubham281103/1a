@@ -146,9 +146,19 @@ def predict_and_generate_outline(
 
     output_json = {"title": "", "outline": []}
     
+    # --- MODIFIED LOGIC FOR MERGING TITLES ---
     title_df = df_engineered[df_engineered['predicted_label'] == 'title']
     if not title_df.empty:
-        output_json["title"] = title_df.iloc[0]['text']
+        # Find the first page that has a title prediction
+        first_title_page = title_df['page_num'].min()
+        # Filter for all titles on that specific page
+        titles_on_first_page = title_df[title_df['page_num'] == first_title_page]
+        # Sort them by vertical position to ensure correct order
+        titles_on_first_page = titles_on_first_page.sort_values(by='y0')
+        # Join their text into a single string
+        merged_title = " ".join(titles_on_first_page['text'])
+        output_json["title"] = merged_title
+    # --- END OF MODIFICATION ---
     
     headings_df = df_engineered[df_engineered['predicted_label'].isin(['H1', 'H2', 'H3'])]
     
@@ -156,7 +166,6 @@ def predict_and_generate_outline(
         output_json["outline"].append({
             "level": row['predicted_label'],
             "text": row['text'],
-            # --- MODIFIED LINE: Changed to 0-based indexing ---
             "page": int(row['page_num']) - 1 
         })
         
