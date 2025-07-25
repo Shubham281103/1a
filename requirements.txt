@@ -1,0 +1,7 @@
+pandas
+PyMuPDF
+pytesseract
+Pillow
+scikit-learn
+joblib
+opencv-python-headless
